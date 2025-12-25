@@ -1,4 +1,4 @@
-# 🔍 WinCLIP Anomaly Detection & Explanation Benchmark
+# WinCLIP Anomaly Detection & Explanation Benchmark
 
 An advanced, Object-Oriented implementation of the **WinCLIP** (Window-based CLIP) framework for zero-shot industrial anomaly detection. This project extends standard localization with semantic reasoning using **BLIP-2** to provide human-readable explanations of detected defects.
 
@@ -8,7 +8,7 @@ An advanced, Object-Oriented implementation of the **WinCLIP** (Window-based CLI
 
 The project is built on **SOLID principles**, prioritizing composition over inheritance and decoupling model logic from application services.
 
-### 🧩 Components
+### Components
 - **`models/`**: Domain wrappers for Foundation Models.
     - `CLIPModel`: Handles zero-shot localization and patch embedding.
     - `BLIP2Model`: Provides visual-linguistic reasoning for patch captioning.

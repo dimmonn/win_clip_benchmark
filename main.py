@@ -19,6 +19,8 @@ class WinCLIPExplainer:
         self.prompts = PromptService(class_name)
         self.patcher = PatchService(self.clip)
         self.benchmarker = BenchmarkService()
+        #TODO test with other classes
+        self.class_name = f"glass {class_name}"
 
         self.defect_labels = [
             "scratch", "dent", "crack", "stain", "hole",
@@ -47,10 +49,15 @@ class WinCLIPExplainer:
 
         for p in tqdm(patches, desc="Analyzing"):
             emb = p['emb'].to(self.device)
-            # Logic for scoring...
-            sn = (emb @ self.normal_embs.T).max().item()
-            sa = (emb @ self.anomaly_embs.T).max().item()
-            p['score'] = sa - sn
+            logits_n = (emb @ self.normal_embs.T)
+            logits_a = (emb @ self.anomaly_embs.T)
+
+            sn = logits_n.max().item()
+            sa = logits_a.max().item()
+            temp = 0.01
+            exp_sa = np.exp(sa / temp)
+            exp_sn = np.exp(sn / temp)
+            p['score'] = exp_sa / (exp_sa + exp_sn)
             p['labels'] = self._rank_labels(emb)
         acc, cnt = np.zeros((H, W)), np.zeros((H, W))
         for p in patches:
@@ -58,8 +65,8 @@ class WinCLIPExplainer:
             acc[t:t + s, l:l + s] += p['score']
             cnt[t:t + s, l:l + s] += 1
         amap = acc / np.maximum(cnt, 1)
-        amap = ndi.gaussian_filter((amap - amap.min()) / (amap.max() - amap.min() + 1e-8), sigma=4)
-
+        amap = (amap - amap.min()) / (amap.max() - amap.min() + 1e-8)
+        amap = ndi.gaussian_filter(amap, sigma=8)
         top_p = max(patches, key=lambda x: x['score'])
         crop = img.crop((top_p['left'], top_p['top'], top_p['left'] + top_p['size'], top_p['top'] + top_p['size']))
 
