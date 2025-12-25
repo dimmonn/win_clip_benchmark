@@ -26,10 +26,8 @@ The project is built on **SOLID principles**, prioritizing composition over inhe
 ### 1. Installation
 Ensure you have [Conda](https://docs.conda.io/en/latest/) installed.
 ```bash
-# Create the environment from the provided spec
 conda env create -f environment.yml
 
-# Activate the environment
 conda activate win_clip_benchmark
 ```
 
@@ -39,10 +37,8 @@ The `main.py` script serves as the entry point. It initializes the `WinCLIPExpla
 ```python
 from main import WinCLIPExplainer
 
-# Initialize for a specific object category
 explainer = WinCLIPExplainer(class_name="bottle")
 
-# Run full pipeline: Localization -> Scoring -> Captioning
 result = explainer.explain("bottle/test/broken_large/000.png")
 
 print(f"Defect Class: {result['explanation']['labels'][0][0]}")
