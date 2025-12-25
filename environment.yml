@@ -1,0 +1,20 @@
+name: win_clip_benchmark
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pillow
+  - tqdm
+  - scikit-learn
+  - matplotlib
+  - pytorch
+  - torchvision
+  - open-clip-torch
+  - transformers
+  - pip:
+      - ftfy
+      - regex
+      - git+https://github.com/openai/CLIP.git
