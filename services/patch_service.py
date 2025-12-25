@@ -2,7 +2,7 @@ import torch
 from PIL import Image
 
 class PatchService:
-    def __init__(self, clip_model, window_sizes=(128, 224), strides=(32, 64)):
+    def __init__(self, clip_model, window_sizes=(32, 64, 128), strides=(8, 16, 32)):
         self.clip_model = clip_model
         self.window_sizes = window_sizes
         self.strides = strides

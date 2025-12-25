@@ -11,16 +11,22 @@ from services.patch_service import PatchService
 from factories.model_factory import ModelFactory
 from services.benchmark_service import BenchmarkService
 
+
 class WinCLIPExplainer:
     def __init__(self, class_name="object", clip_name="ViT-B-32"):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.display_name = class_name
+        self.internal_class_name = f"top view of a glass {class_name} neck"
+
         self.clip: CLIPModel = ModelFactory.create_clip(clip_name, self.device)
+
         self.blip: BLIP2Model = ModelFactory.create_captioner("blip2", self.device)
         self.prompts = PromptService(class_name)
         self.patcher = PatchService(self.clip)
         self.benchmarker = BenchmarkService()
-        #TODO test with other classes
+        # TODO test with other classes
         self.class_name = f"glass {class_name}"
+        self.internal_class_name = f"top view of a glass bottle neck"
 
         self.defect_labels = [
             "scratch", "dent", "crack", "stain", "hole",
@@ -29,7 +35,6 @@ class WinCLIPExplainer:
         self.normal_embs = self.clip.encode_text(self.prompts.get_normal_prompts())
         self.anomaly_embs = self.clip.encode_text(self.prompts.get_anomaly_prompts())
         self.label_embs = self.clip.encode_text(self.prompts.get_defect_label_prompts(self.defect_labels))
-
 
     def run_benchmark(self, image_path, gt_path):
         result = self.explain(image_path)
@@ -66,7 +71,8 @@ class WinCLIPExplainer:
             cnt[t:t + s, l:l + s] += 1
         amap = acc / np.maximum(cnt, 1)
         amap = (amap - amap.min()) / (amap.max() - amap.min() + 1e-8)
-        amap = ndi.gaussian_filter(amap, sigma=8)
+        amap = ndi.gaussian_filter(amap, sigma=4)
+
         top_p = max(patches, key=lambda x: x['score'])
         crop = img.crop((top_p['left'], top_p['top'], top_p['left'] + top_p['size'], top_p['top'] + top_p['size']))
 
@@ -75,7 +81,11 @@ class WinCLIPExplainer:
             'explanation': {
                 'score': top_p['score'],
                 'labels': top_p['labels'],
-                'caption': self.blip.generate_caption(crop)
+                # Ground the captioning in industrial inspection context
+                'caption': self.blip.generate_caption(
+                    crop,
+                    context_prompt=f"Question: What is the defect visible on this {self.display_name} rim? Answer: The defect is"
+                )
             }
         }
 
