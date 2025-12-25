@@ -3,7 +3,7 @@ import torch
 import scipy.ndimage as ndi
 from tqdm import tqdm
 from PIL import Image
-
+import torch.nn.functional as F
 from models.clip_wrapper import CLIPModel
 from models.blip_wrapper import BLIP2Model
 from services.prompt_service import PromptService
@@ -22,12 +22,19 @@ class WinCLIPExplainer:
 
         self.blip: BLIP2Model = ModelFactory.create_captioner("blip2", self.device)
         self.prompts = PromptService(class_name)
-        self.patcher = PatchService(self.clip)
+        self.patcher = PatchService(
+            self.clip,
+            window_sizes=(16, 32, 64),
+            strides=(8, 16, 32)
+        )
         self.benchmarker = BenchmarkService()
         # TODO test with other classes
         self.class_name = f"glass {class_name}"
         self.internal_class_name = f"top view of a glass bottle neck"
-
+        self.normal_ref = self.compute_normal_reference([
+            "bottle/test/broken_large/000.png",
+            "bottle/ground_truth/broken_large/000_mask.png"
+        ])
         self.defect_labels = [
             "scratch", "dent", "crack", "stain", "hole",
             "misalignment", "missing part", "discoloration"
@@ -47,6 +54,16 @@ class WinCLIPExplainer:
         vals, idx = torch.topk(sims, k=3)
         return [(self.defect_labels[i], float(v)) for v, i in zip(vals, idx)]
 
+    def compute_normal_reference(self, normal_image_paths):
+        embs = []
+        for p in normal_image_paths:
+            img = Image.open(p).convert("RGB")
+            patches = self.patcher.get_patches(img)
+            for patch in patches:
+                embs.append(patch["emb"])
+        ref = torch.stack(embs).mean(dim=0)
+        return F.normalize(ref, dim=-1)
+
     def explain(self, image_path):
         img = Image.open(image_path).convert("RGB")
         W, H = img.size
@@ -59,10 +76,12 @@ class WinCLIPExplainer:
 
             sn = logits_n.max().item()
             sa = logits_a.max().item()
-            temp = 0.01
-            exp_sa = np.exp(sa / temp)
-            exp_sn = np.exp(sn / temp)
-            p['score'] = exp_sa / (exp_sa + exp_sn)
+            text_margin = sa - sn
+            feat_margin = 1.0 - torch.cosine_similarity(
+                emb.unsqueeze(0), self.normal_ref.unsqueeze(0)
+            ).item()
+
+            p['score'] = 0.5 * text_margin + 0.5 * feat_margin
             p['labels'] = self._rank_labels(emb)
         acc, cnt = np.zeros((H, W)), np.zeros((H, W))
         for p in patches:
@@ -71,7 +90,12 @@ class WinCLIPExplainer:
             cnt[t:t + s, l:l + s] += 1
         amap = acc / np.maximum(cnt, 1)
         amap = (amap - amap.min()) / (amap.max() - amap.min() + 1e-8)
-        amap = ndi.gaussian_filter(amap, sigma=4)
+        amap = ndi.gaussian_filter(amap, sigma=2)
+
+        img_gray = np.array(img.convert("L")) / 255.0
+        edges = ndi.sobel(img_gray)
+        edges = (edges - edges.min()) / (edges.max() - edges.min() + 1e-8)
+        amap *= (1.0 - 0.6 * edges)
 
         top_p = max(patches, key=lambda x: x['score'])
         crop = img.crop((top_p['left'], top_p['top'], top_p['left'] + top_p['size'], top_p['top'] + top_p['size']))
@@ -81,10 +105,9 @@ class WinCLIPExplainer:
             'explanation': {
                 'score': top_p['score'],
                 'labels': top_p['labels'],
-                # Ground the captioning in industrial inspection context
                 'caption': self.blip.generate_caption(
                     crop,
-                    context_prompt=f"Question: What is the defect visible on this {self.display_name} rim? Answer: The defect is"
+                    context_prompt="Describe the physical texture of the damaged material in this industrial close-up. Material: glass. Damage:"
                 )
             }
         }

@@ -1,7 +1,6 @@
 class PromptService:
-    STATE_WORDS_NORMAL = ["flawless", "normal", "intact", "good", "undamaged", "dark center", "smooth rim"]
-    STATE_WORDS_ANOMALY = ["damaged", "broken", "cracked", "scratched", "stained", "missing", "jagged edge",
-                           "chipped glass"]
+    STATE_WORDS_NORMAL = ["flawless", "smooth rim", "transparent glass", "solid black background", "empty center"]
+    STATE_WORDS_ANOMALY = ["jagged edge", "broken glass rim", "chipped glass neck", "shattered translucent fragments"]
     TEMPLATES = ["a photo of a {}", "a cropped photo of a {}", "a close-up photo of a {}",
                  "a high-resolution photo of a {}", "a picture of {}"]
 
