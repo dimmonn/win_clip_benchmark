@@ -108,4 +108,4 @@ The `BenchmarkService` generates a comparison plot saved as `result.png`:
 ```
 
 ## ⚖️ License
-This project is intended for research and benchmarking purposes. It utilizes models from OpenAI (CLIP) and Salesforce (BLIP-2). Please refer to the `license.txt` in the dataset folders for MVTec AD usage terms.
+This project is intended for research and benchmarking purposes. It utilizes models CLIP and BLIP-2. Please refer to the `readme.txt` in the bottle folder for usage terms.
