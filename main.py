@@ -74,7 +74,7 @@ class WinCLIPExplainer:
 
 
 if __name__ == "__main__":
-    explainer = WinCLIPExplainer(class_name="bottle")
+    explainer = WinCLIPExplainer(class_name="bottle", clip_name="ViT-B-16")
     img_p = "bottle/test/broken_large/000.png"
     gt_p = "bottle/ground_truth/broken_large/000_mask.png"
 

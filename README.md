@@ -4,7 +4,7 @@ An advanced, Object-Oriented implementation of the **WinCLIP** (Window-based CLI
 
 ---
 
-## 🏗️ Architecture & Design Patterns
+## Architecture & Design Patterns
 
 The project is built on **SOLID principles**, prioritizing composition over inheritance and decoupling model logic from application services.
 
@@ -21,7 +21,7 @@ The project is built on **SOLID principles**, prioritizing composition over inhe
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Installation
 Ensure you have [Conda](https://docs.conda.io/en/latest/) installed.
@@ -47,7 +47,7 @@ print(f"AI Description: {result['explanation']['caption']}")
 
 ---
 
-## 📊 Benchmarking & Interpretation
+## Benchmarking & Interpretation
 
 ### How it works
 1.  **Localization**: `PatchService` extracts overlapping windows at multiple scales (e.g., 128x128, 224x224).
@@ -56,15 +56,8 @@ print(f"AI Description: {result['explanation']['caption']}")
     *   **Top Labels**: Cosine similarity rankings against a bank of defect terms (crack, stain, etc.).
     *   **Caption**: A semantic description of the specific crop (e.g., *"a circular object with a red light on top"*).
 
-### Visual Output
-The `BenchmarkService` generates a comparison plot saved as `result.png`:
-- **Input Image**: Original source.
-- **Anomaly Map**: Heatmap of predicted defect locations.
-- **Ground Truth**: (Optional) Mask comparison for AUC calculation.
 
----
-
-## 🛠️ Project Structure
+## Project Structure
 ```text
  ~/PythonProject/win_clip_benchmark   main ±✚  tree                   
 .
@@ -107,5 +100,5 @@ The `BenchmarkService` generates a comparison plot saved as `result.png`:
     └── smoke_test.py
 ```
 
-## ⚖️ License
+## License
 This project is intended for research and benchmarking purposes. It utilizes models CLIP and BLIP-2. Please refer to the `readme.txt` in the bottle folder for usage terms.
