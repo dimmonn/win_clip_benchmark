@@ -39,7 +39,7 @@ from main import WinCLIPExplainer
 
 explainer = WinCLIPExplainer(class_name="bottle")
 
-result = explainer.explain("bottle/test/broken_large/000.png")
+result = explainer.explain("bottle/broken_large/000.png")
 
 print(f"Defect Class: {result['explanation']['labels'][0][0]}")
 print(f"AI Description: {result['explanation']['caption']}")

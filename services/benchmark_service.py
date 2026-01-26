@@ -21,22 +21,22 @@ class BenchmarkService:
         auc = roc_auc_score(y_true, y_score)
         return auc
 
-    def visualize(self, image_path, anomaly_map, gt_mask_path, save_name="result.png"):
+    def visualize(self, image_path, anomaly_map, save_name="result.png", model_name="CLIP"):
         img = Image.open(image_path)
-        gt = np.array(Image.open(gt_mask_path)) if os.path.exists(gt_mask_path) else None
 
-        fig, axes = plt.subplots(1, 3 if gt is not None else 2, figsize=(15, 5))
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
         axes[0].imshow(img)
         axes[0].set_title("Input")
+        axes[0].axis("off")
 
-        im = axes[1].imshow(anomaly_map, cmap='jet')
+        im = axes[1].imshow(anomaly_map, cmap="jet")
         axes[1].set_title("Anomaly Map")
-        plt.colorbar(im, ax=axes[1])
-
-        if gt is not None:
-            axes[2].imshow(gt, cmap='gray')
-            axes[2].set_title("Ground Truth")
+        axes[1].axis("off")
+        plt.colorbar(im, ax=axes[1], fraction=0.046, pad=0.04)
 
         plt.tight_layout()
-        plt.savefig(os.path.join(self.output_dir, save_name))
+        save_path = os.path.join(self.output_dir, save_name)
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
         plt.close()

@@ -3,8 +3,8 @@ from models.blip_wrapper import BLIP2Model
 
 class ModelFactory:
     @staticmethod
-    def create_clip(model_name="ViT-B-32", device="cpu"):
-        return CLIPModel(model_name=model_name, device=device)
+    def create_clip(model_name="ViT-B-32", device="cpu", is_open_clip: bool = False):
+        return CLIPModel(model_name=model_name, device=device, is_open_clip=is_open_clip)
 
     @staticmethod
     def create_captioner(model_type="blip2", device="cpu"):
